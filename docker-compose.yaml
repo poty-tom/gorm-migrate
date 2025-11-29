@@ -1,0 +1,29 @@
+services:
+  mariadb:
+    container_name: gorm-migrate
+    image: ${GORM_MIGRATE_IMAGE}:latest # ローカルビルドされたイメージを前提としている構成
+    environment:
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+    ports:
+      - 3306:3306
+    volumes:
+      - mariadb-volume:/var/lib/mysql
+      - ./db/conf.d:/etc/mysql/conf.d
+
+  phpmyadmin:
+    build:
+      context: docker/phpmyadmin
+    depends_on:
+      - mariadb
+    environment:
+      - PMA_ARBITRARY=${PMA_ARBITRARY}
+      - PMA_HOSTS=${PMA_HOSTS}
+      - PMA_USER=${PMA_USER}
+      - PMA_PASSWORD=${PMA_PASSWORD}
+    ports:
+      - 3001:80
+volumes:
+  mariadb-volume:
